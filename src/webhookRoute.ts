@@ -1,5 +1,7 @@
 import { Hono } from 'hono';
 import {deploymentManager} from "./deployments/DeploymentManager.ts";
+import {Webhooks} from "@octokit/webhooks";
+import {config} from "./config.ts";
 
 // Empty function to handle new code updates
 function newCode(branchName: string, commitHash: string) {
@@ -13,10 +15,21 @@ function deletedBranch(branchName: string) {
 
 const webhookRoute = new Hono();
 
-// This endpoint listens for GitHub webhook events
-webhookRoute.post('/githubwebhook', async (c) => {
-    // Retrieve the GitHub event type from the header
+const webhooks = new Webhooks({
+    secret: config.githubWebhookSecret,
+});
+
+
+webhookRoute.post('/github', async (c) => {
+
     const event = c.req.header('X-GitHub-Event');
+    const signature = c.req.header('x-hub-signature-256')
+    const rawBody = await c.req.text()
+
+    if (!signature || !(await webhooks.verify(rawBody, signature))) {
+        return c.text('unauthorized', 401)
+    }
+
     const payload = await c.req.json();
 
     if (event === 'push') {

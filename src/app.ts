@@ -2,7 +2,7 @@
 import {config} from "./config.ts";
 import {proxyManager} from "./proxy/ProxyManager.ts";
 
-const http = require('http');
+import * as http from 'http';
 import {Hono} from "hono";
 import {webhookRoute} from "./webhookRoute.ts";
 

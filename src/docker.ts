@@ -1,4 +1,5 @@
-var Docker = require('dockerode')
+import Docker from 'dockerode';
+
 
 const docker = new Docker()
 

@@ -18,6 +18,7 @@ export class DeploymentManager {
             console.error('Error launching deployment for: '+ deployment.branchName+ ' ' + deployment.commitHash, e)
             //todo: process failed deployments
         }
+        // we make sure deployments before deleting any old ones to minimize downtime
         const oldDeploymentIndex = this.branchDeployments.findIndex((searchEl)=>{
             return searchEl.branchName == deployment.branchName
         })

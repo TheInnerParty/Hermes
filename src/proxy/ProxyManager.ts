@@ -1,4 +1,4 @@
-var httpProxy = require('http-proxy')
+import httpProxy from 'http-proxy'
 import {getPort} from "get-port-please";
 
 
@@ -20,7 +20,7 @@ export class ProxyManager {
         return [...this.proxyMap.values()];
     }
 
-    // beware of race conditions with this todo: re-architect getFreePort for simul builds
+    // beware of race conditions with this, fine for now with serialized builds but todo: re-architect getFreePort for simul builds
     private async getFreePort() {
         const port = await getPort({ random: true, portRange: [3001, 3999]})
         if (!this.getUsedPorts().includes(port)) {
@@ -31,15 +31,16 @@ export class ProxyManager {
     handleProxyRequest(host: string, req: any, res: any) {
         const port = this.getBranchPort(host)
         if (!port) {
-            res.writeHead(404, { 'Content-Type': 'text/plain' });
-            res.end('Not Found');
+            res.writeHead(404, { 'Content-Type': 'text/plain' })
+            res.end('Not Found')
+            return
         }
         this.proxy.web(req, res, (err: Error) => {
-            console.error('Proxy error:', err);
-            res.writeHead(500, { 'Content-Type': 'text/plain' });
-            res.end('Proxy error');
+            console.error('Proxy error:', err)
+            res.writeHead(500, { 'Content-Type': 'text/plain' })
+            res.end('Proxy error')
         }, {
-            target: 'something'
+            target: `http://localhost:${port}`
         });
     }
 

@@ -7,7 +7,7 @@ import {DeploymentConfig} from "./DeploymentConfig.ts";
 import {docker} from "../docker.ts";
 import {proxyManager} from "../proxy/ProxyManager.ts";
 
-const tar = require('tar-fs')
+import tar from 'tar-fs'
 const execPromise = promisify(exec);
 
 function generate5ByteString() {
@@ -70,7 +70,8 @@ export class Deployment {
     private async startDockerContainer(imageName: string, port: number, deploymentConfig: DeploymentConfig) :Promise<string> {
         const container = await docker.createContainer({
             Image: imageName,
-            ExposedPorts: { '${deploymentConfig.dockerExposedPort}/tcp': {} },
+            ExposedPorts: { [`${deploymentConfig.dockerExposedPort}/tcp`]: {} },
+
             HostConfig: {
                 PortBindings: {
                     [`${deploymentConfig.dockerExposedPort}:tcp`]: [{ HostPort: port.toString() }],
