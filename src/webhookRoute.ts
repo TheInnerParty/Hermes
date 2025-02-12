@@ -1,21 +1,20 @@
 import { Hono } from 'hono';
+import {deploymentManager} from "./deployments/DeploymentManager.ts";
 
 // Empty function to handle new code updates
 function newCode(branchName: string, commitHash: string) {
-    // TODO: Add your code handling logic here
-    console.log(`New code on branch "${branchName}" with commit "${commitHash}".`);
+    deploymentManager.deployBranch(branchName, commitHash)
 }
 
 // Empty function to handle branch deletion
 function deletedBranch(branchName: string) {
-    // TODO: Add your branch deletion handling logic here
-    console.log(`Branch deleted: "${branchName}".`);
+    deploymentManager.deleteBranch(branchName)
 }
 
 const webhookRoute = new Hono();
 
 // This endpoint listens for GitHub webhook events
-webhookRoute.post('/webhook', async (c) => {
+webhookRoute.post('/githubwebhook', async (c) => {
     // Retrieve the GitHub event type from the header
     const event = c.req.header('X-GitHub-Event');
     const payload = await c.req.json();

@@ -5,6 +5,7 @@ import {exec} from "child_process";
 import * as fs from "node:fs";
 import {DeploymentConfig} from "./DeploymentConfig.ts";
 import {docker} from "../docker.ts";
+import {proxyManager} from "../proxy/ProxyManager.ts";
 
 const tar = require('tar-fs')
 const execPromise = promisify(exec);
@@ -19,8 +20,9 @@ export class Deployment {
 
     private containerName: string
     private buildUUID: string
-
     private containerID: string | undefined
+
+    public isKilled: boolean
 
     private async downloadRepo(branch: string, repoURL: string, buildUUID: string) {
         const baseLocation = config.workDirectory.replace(/\/$/, '')
@@ -84,22 +86,24 @@ export class Deployment {
         await fs.promises.rm(repoPath, {recursive: true, force: true})
     }
 
-    constructor(public branchName:string, private commitHash: string) {
+    constructor(public branchName:string, public commitHash: string) {
         this.buildUUID = generate5ByteString()
         this.containerName = branchName + '-' + commitHash + '-' + this.buildUUID
+        this.isKilled = false
     }
 
-    async launch(port: number) {
+    async launch() {
         const repoPath = await this.downloadRepo(this.branchName, config.repoURL, this.buildUUID)
         const deploymentConfig = await DeploymentConfig.getDeploymentConfig(this.buildUUID, repoPath)
         const tarStream = await this.createRepoTarStream(deploymentConfig, repoPath)
         await this.buildDockerImage(this.containerName, tarStream, deploymentConfig)
+        const port = await proxyManager.createProxyForBranch(this.branchName)
         this.containerID = await this.startDockerContainer(this.containerName, port, deploymentConfig)
         await this.deleteWorkingDirectory(repoPath)
     }
 
     async getStatus() {
-
+        //todo: implement getStatus
     }
 
     async kill() {
@@ -110,6 +114,7 @@ export class Deployment {
             const image = docker.getImage(this.containerName)
             await image.remove()
         }
+        this.isKilled = true
     }
 
 

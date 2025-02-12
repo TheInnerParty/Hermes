@@ -1,12 +1,10 @@
-import httpProxy from 'http-proxy';
+var httpProxy = require('http-proxy')
 import {getPort} from "get-port-please";
 
 
 export class ProxyManager {
     proxy: any
-
     proxyMap: Map<string, number>
-
 
     constructor() {
         this.proxy = httpProxy.createProxyServer();
@@ -20,6 +18,14 @@ export class ProxyManager {
 
     private getUsedPorts() {
         return [...this.proxyMap.values()];
+    }
+
+    // beware of race conditions with this todo: re-architect getFreePort for simul builds
+    private async getFreePort() {
+        const port = await getPort({ random: true, portRange: [3001, 3999]})
+        if (!this.getUsedPorts().includes(port)) {
+            return port
+        } else throw new Error('Port already routed')
     }
 
     handleProxyRequest(host: string, req: any, res: any) {
@@ -37,12 +43,11 @@ export class ProxyManager {
         });
     }
 
-    private createProxyForBranch(branchName: string) {
-        //todo: implement
+    async createProxyForBranch(branchName: string) {
+        const port = await this.getFreePort()
+        this.proxyMap.set(branchName, port)
+        return port
     }
-
-
-
 
 }
 

@@ -4,13 +4,16 @@ import {proxyManager} from "./proxy/ProxyManager.ts";
 
 const http = require('http');
 import {Hono} from "hono";
+import {webhookRoute} from "./webhookRoute.ts";
 
 
 const app = new Hono();
 
 app.get('/', (c) => {
-    return c.text('Hello from server.example.com (handled by Hono)');
+    return c.text('Hermes Server');
 });
+
+app.route('/hooks', webhookRoute)
 
 
 const server = http.createServer((req: any, res: any) => {
