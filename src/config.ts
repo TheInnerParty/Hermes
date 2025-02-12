@@ -8,7 +8,8 @@ import {
 } from "env-var";
 import * as os from "node:os";
 
-import 'dotenv/config'
+import dotenv from 'dotenv'
+dotenv.config()
 
 class Config {
 
