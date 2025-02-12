@@ -14,7 +14,7 @@ export class DeploymentConfig {
         this.dockerExposedPort = raw.dockerExposedPort || 3000
     }
 
-    async getDeploymentConfig(buildUUID: string, repoPath: string) {
+    static async getDeploymentConfig(buildUUID: string, repoPath: string) {
         let configString: string | undefined = undefined
         try {
             configString = await fs.promises.readFile(repoPath + '/hermes-config.json', 'utf-8')

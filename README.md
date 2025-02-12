@@ -1,2 +1,4 @@
 # Hermes
-Easy CI for Docker
+Easy CD for Docker
+
+WIP, does not run yet

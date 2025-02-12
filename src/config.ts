@@ -15,11 +15,17 @@ class Config {
 
     public readonly workDirectory: string;
 
+    public readonly repoURL: string;
+
+    public readonly serverHostName: string
+
     constructor(private processEnv = process.env) {
         // dumb library needs NODE_ENV set
         let env = from(Object.assign({}, processEnv, { NODE_ENV: "production" }));
         this.ListenPort = env.get("PORT").default(3000).asInt();
         this.workDirectory = env.get("workDirectory").default("~/hermes-deployments").asString()
+        this.repoURL = env.get("repoURL").required().asString()
+        this.serverHostName = env.get('serverHostName').required().asString()
 
 
         Object.freeze(this);

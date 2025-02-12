@@ -84,21 +84,32 @@ export class Deployment {
         await fs.promises.rm(repoPath, {recursive: true, force: true})
     }
 
-    constructor(private branchName:string, private commitHash: string) {
-        this.containerName = branchName + '-' + commitHash
+    constructor(public branchName:string, private commitHash: string) {
         this.buildUUID = generate5ByteString()
+        this.containerName = branchName + '-' + commitHash + '-' + this.buildUUID
     }
 
-    async launch() {
+    async launch(port: number) {
+        const repoPath = await this.downloadRepo(this.branchName, config.repoURL, this.buildUUID)
+        const deploymentConfig = await DeploymentConfig.getDeploymentConfig(this.buildUUID, repoPath)
+        const tarStream = await this.createRepoTarStream(deploymentConfig, repoPath)
+        await this.buildDockerImage(this.containerName, tarStream, deploymentConfig)
+        this.containerID = await this.startDockerContainer(this.containerName, port, deploymentConfig)
+        await this.deleteWorkingDirectory(repoPath)
+    }
+
+    async getStatus() {
 
     }
 
-    getStatus() {
-
-    }
-
-    kill() {
-
+    async kill() {
+        if (this.containerID) {
+            const container = docker.getContainer(this.containerID)
+            await container.stop()
+            await container.remove()
+            const image = docker.getImage(this.containerName)
+            await image.remove()
+        }
     }
 
 

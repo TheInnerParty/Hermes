@@ -7,7 +7,11 @@ export class DeploymentManager {
         this.branchDeployments = []
     }
 
-
-
-
+    deployBranch(branchName: string) {
+        //todo
+    }
 }
+
+const deploymentManager = new DeploymentManager()
+
+export {deploymentManager}
