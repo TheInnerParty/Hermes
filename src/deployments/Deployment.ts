@@ -32,8 +32,9 @@ export class Deployment {
         const { stdout, stderr } = await execPromise(cloneCmd, {cwd: baseLocation});
         console.log(stdout);
         if (stderr) {
+            console.error('standard error output detected: ')
             console.error(stderr);
-            throw new Error('Could not download repo')
+            // throw new Error('Could not download repo')
         }
         return baseLocation + '/' + buildUUID
     }
