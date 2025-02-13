@@ -25,7 +25,7 @@ const server = http.createServer((req: any, res: any) => {
         proxyManager.handleProxyRequest(host, req, res)
 
     } else if (host === config.serverHostName) {
-
+        console.log('serving with hono')
         app.fetch(req, res);
     } else {
         res.writeHead(404, { 'Content-Type': 'text/plain' });
