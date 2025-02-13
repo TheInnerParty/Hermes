@@ -32,12 +32,12 @@ export class ProxyManager {
         const port = this.getBranchPort(host)
         if (!port) {
             res.writeHead(404, { 'Content-Type': 'text/plain' })
-            res.end('Not Found')
+            res.end('Deployment not found')
             return
         }
         this.proxy.web(req, res, (err: Error) => {
             console.error('Proxy error:', err)
-            res.writeHead(500, { 'Content-Type': 'text/plain' })
+            res.writeHead(404, { 'Content-Type': 'text/plain' })
             res.end('Proxy error')
         }, {
             target: `http://localhost:${port}`

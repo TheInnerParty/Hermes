@@ -28,7 +28,7 @@ const server = http.createServer((req: any, res: any) => {
         app.fetch(req, res);
     } else {
         res.writeHead(404, { 'Content-Type': 'text/plain' });
-        res.end('Not Found');
+        res.end('No Valid Host Header- not found');
     }
 });
 
