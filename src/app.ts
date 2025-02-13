@@ -26,32 +26,40 @@ const server = http.createServer(async (req: any, res: any) => {
         proxyManager.handleProxyRequest(host, req, res)
 
     } else if (host === config.serverHostName) {
-        {
-            try {
-                // Wrap in Promise.resolve to handle both promise and non-promise responses.
-                let response = await Promise.resolve(app.fetch(req));
+        try {
+            // Build a full URL for Hono to correctly parse the route.
+            const fullUrl = `http://${req.headers.host}${req.url}`;
+            // Create a proper Request object using the full URL.
+            const honoRequest = new Request(fullUrl, {
+                method: req.method,
+                headers: req.headers,
+                // Only attach a body for methods that support it.
+                body: req.method === 'GET' || req.method === 'HEAD' ? undefined : req,
+            });
 
-                // Write status and headers to the Node response
-                res.writeHead(response.status, Object.fromEntries(response.headers.entries()));
+            // Wrap app.fetch() in Promise.resolve() in case it returns a synchronous response.
+            const response = await Promise.resolve(app.fetch(honoRequest));
 
-                // Handle the response body
-                if (response.body) {
-                    // If it's a Node stream, pipe it directly
-                    if (typeof response.body.pipe === 'function') {
-                        response.body.pipe(res);
-                    } else {
-                        // Otherwise, assume it's a web stream or already fully buffered
-                        const bodyText = await response.text();
-                        res.end(bodyText);
-                    }
+            // Write the status and headers to the Node response.
+            res.writeHead(response.status, Object.fromEntries(response.headers.entries()));
+
+            // Handle the response body.
+            if (response.body) {
+                if (typeof response.body.pipe === 'function') {
+                    // If it's a Node stream, pipe it directly.
+                    response.body.pipe(res);
                 } else {
-                    res.end();
+                    // Otherwise, read it as text and end the response.
+                    const bodyText = await response.text();
+                    res.end(bodyText);
                 }
-            } catch (err) {
-                console.error('Error in Hono handler:', err);
-                res.statusCode = 500;
-                res.end('Internal Server Error- api handler');
+            } else {
+                res.end();
             }
+        } catch (err) {
+            console.error('Error in Hono handler:', err);
+            res.statusCode = 500;
+            res.end('Internal Server Error- api handler');
         }
     } else {
         res.writeHead(404, { 'Content-Type': 'text/plain' });
