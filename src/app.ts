@@ -13,7 +13,7 @@ app.get('/', (c) => {
     return c.text('Hermes Server');
 });
 
-app.route('/hooks', webhookRoute)
+// app.route('/hooks', webhookRoute)
 
 
 const server = http.createServer((req: any, res: any) => {
