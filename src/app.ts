@@ -4,11 +4,12 @@ import {proxyManager} from "./proxy/ProxyManager.ts";
 
 import * as http from 'http';
 import {Hono} from "hono";
+import {logger} from "hono/logger";
 import {webhookRoute} from "./webhookRoute.ts";
 
 
 const app = new Hono();
-
+app.use(logger())
 app.get('/', (c) => {
     return c.text('Hermes Server');
 });
