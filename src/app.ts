@@ -41,12 +41,15 @@ const server = http.createServer(async (req: any, res: any) => {
             const response = await Promise.resolve(app.fetch(honoRequest));
 
             // Write the status and headers to the Node response.
+            //@ts-ignore
             res.writeHead(response.status, Object.fromEntries(response.headers.entries()));
 
             // Handle the response body.
             if (response.body) {
+                //@ts-ignore
                 if (typeof response.body.pipe === 'function') {
                     // If it's a Node stream, pipe it directly.
+                    //@ts-ignore
                     response.body.pipe(res);
                 } else {
                     // Otherwise, read it as text and end the response.
