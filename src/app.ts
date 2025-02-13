@@ -16,7 +16,7 @@ app.get('/', (c) => {
 // app.route('/hooks', webhookRoute)
 
 
-const server = http.createServer((req: any, res: any) => {
+const server = http.createServer(async (req: any, res: any) => {
 
     const host = req.headers.host ? req.headers.host.split(':')[0] : '';
     console.log('got request with host: ', host)
@@ -25,8 +25,33 @@ const server = http.createServer((req: any, res: any) => {
         proxyManager.handleProxyRequest(host, req, res)
 
     } else if (host === config.serverHostName) {
-        console.log('serving with hono')
-        app.fetch(req, res);
+        {
+            try {
+                // Wrap in Promise.resolve to handle both promise and non-promise responses.
+                let response = await Promise.resolve(app.fetch(req));
+
+                // Write status and headers to the Node response
+                res.writeHead(response.status, Object.fromEntries(response.headers.entries()));
+
+                // Handle the response body
+                if (response.body) {
+                    // If it's a Node stream, pipe it directly
+                    if (typeof response.body.pipe === 'function') {
+                        response.body.pipe(res);
+                    } else {
+                        // Otherwise, assume it's a web stream or already fully buffered
+                        const bodyText = await response.text();
+                        res.end(bodyText);
+                    }
+                } else {
+                    res.end();
+                }
+            } catch (err) {
+                console.error('Error in Hono handler:', err);
+                res.statusCode = 500;
+                res.end('Internal Server Error- api handler');
+            }
+        }
     } else {
         res.writeHead(404, { 'Content-Type': 'text/plain' });
         res.end('No Valid Host Header- not found');
