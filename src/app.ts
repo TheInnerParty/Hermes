@@ -19,6 +19,7 @@ app.route('/hooks', webhookRoute)
 const server = http.createServer((req: any, res: any) => {
 
     const host = req.headers.host ? req.headers.host.split(':')[0] : '';
+    console.log('got request with host: ', host)
 
     if (host.endsWith('.'+config.serverHostName)) {
         proxyManager.handleProxyRequest(host, req, res)
