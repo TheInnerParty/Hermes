@@ -21,7 +21,7 @@ const webhooks = new Webhooks({
 
 
 webhookRoute.post('/github', async (c) => {
-
+    console.log('got github event')
     const event = c.req.header('X-GitHub-Event');
     const signature = c.req.header('x-hub-signature-256')
     const rawBody = await c.req.text()
@@ -31,6 +31,8 @@ webhookRoute.post('/github', async (c) => {
     }
 
     const payload = await c.req.json();
+
+    console.log('event type: ', event)
 
     if (event === 'push') {
         // A push event can be for new commits or branch deletion.
