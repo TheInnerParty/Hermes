@@ -33,6 +33,6 @@ const server = http.createServer((req: any, res: any) => {
 });
 
 
-server.listen(3000, () => {
+server.listen(config.ListenPort, () => {
     console.log('Hermes Server is listening')
 });
