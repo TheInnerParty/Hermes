@@ -75,7 +75,7 @@ export class Deployment {
 
             HostConfig: {
                 PortBindings: {
-                    [`${deploymentConfig.dockerExposedPort}:tcp`]: [{ HostPort: port.toString() }],
+                    [`${deploymentConfig.dockerExposedPort}/tcp`]: [{ HostPort: port.toString() }],
                 },
             },
         })
