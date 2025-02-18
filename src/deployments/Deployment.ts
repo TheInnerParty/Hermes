@@ -69,6 +69,7 @@ export class Deployment {
     }
 
     private async startDockerContainer(imageName: string, port: number, deploymentConfig: DeploymentConfig) :Promise<string> {
+        console.log('starting docker container ', imageName)
         const container = await docker.createContainer({
             Image: imageName,
             ExposedPorts: { [`${deploymentConfig.dockerExposedPort}/tcp`]: {} },
@@ -79,6 +80,7 @@ export class Deployment {
                 },
             },
         })
+        console.log('created container: ', container.id)
         await container.start()
         return container.id
     }
