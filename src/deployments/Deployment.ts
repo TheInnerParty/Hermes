@@ -78,6 +78,8 @@ export class Deployment {
                 PortBindings: {
                     [`${deploymentConfig.dockerExposedPort}/tcp`]: [{ HostPort: port.toString() }],
                 },
+                ExtraHosts: ['host.docker.internal:host-gateway'],
+
             },
         })
         console.log('created container: ', container.id)
